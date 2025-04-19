@@ -113,4 +113,8 @@ public class ConsoleUI {
         }
         System.out.println();
     }
+
+    public void printMessage(String s) {
+        System.out.println(s);
+    }
 }
