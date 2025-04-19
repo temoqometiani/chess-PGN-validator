@@ -28,7 +28,7 @@ public class PGNController {
      * @param file The PGN file to process
      */
     public void run(File file) {
-        List<PGNGame> games = Collections.singletonList(parser.parse(String.valueOf(file)));
+        List<PGNGame> games = Collections.singletonList((PGNGame) parser.parse(new File(String.valueOf(file))));
         int gameNumber = 1;
 
         for (PGNGame game : games) {

@@ -1,62 +1,85 @@
 package src.model;
 
+import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses PGN text into PGNGame objects (tags + SAN moves).
+ * PGNParser reads .pgn files and splits them into PGNGame objects.
  */
 public class PGNParser {
 
-    private static final Pattern TAG_PATTERN = Pattern.compile("\\[(\\w+)\\s+\"([^\"]+)\"\\]");
-    private static final Pattern MOVE_TOKEN_PATTERN = Pattern.compile("([a-zA-Z0-9+=#]+|\\d+\\.|\\d+\\.\\.\\.|\\*)");
+    private static final Pattern TAG_PATTERN = Pattern.compile("\\[(\\w+)\\s+\\\"([^\\\"]*)\\\"]");
+    private static final Pattern MOVE_TOKEN_PATTERN = Pattern.compile("[^\\s]+\\s*");
 
-    /**
-     * Parses a single PGN game string into a PGNGame object.
-     *
-     * @param pgnText The raw PGN game as a string
-     * @return Parsed PGNGame
-     * @throws IllegalArgumentException if required tags or format are invalid
-     */
-    public PGNGame parse(String pgnText) {
+    public List<PGNGame> parse(File file) {
+        List<PGNGame> games = new ArrayList<>();
+        List<String> currentTags = new ArrayList<>();
+        StringBuilder moveText = new StringBuilder();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                if (line.startsWith("[")) {
+                    currentTags.add(line);
+                } else if (line.isEmpty()) {
+                    if (!currentTags.isEmpty() || moveText.length() > 0) {
+                        PGNGame game = parseGame(currentTags, moveText.toString());
+                        games.add(game);
+                        currentTags.clear();
+                        moveText.setLength(0);
+                    }
+                } else {
+                    moveText.append(line).append(" ");
+                }
+            }
+
+            // Add last game if file doesn't end with a blank line
+            if (!currentTags.isEmpty() || moveText.length() > 0) {
+                PGNGame game = parseGame(currentTags, moveText.toString());
+                games.add(game);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return games;
+    }
+
+    private PGNGame parseGame(List<String> tagLines, String moveSection) {
         Map<String, String> tags = new HashMap<>();
-        List<Move> moves = new ArrayList<>();
-        String result = "*";
 
-        Scanner scanner = new Scanner(pgnText);
-        StringBuilder moveSection = new StringBuilder();
-
-        // Parse tags
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine().trim();
-            if (line.isEmpty()) break;
-
-            Matcher tagMatcher = TAG_PATTERN.matcher(line);
-            if (tagMatcher.matches()) {
-                tags.put(tagMatcher.group(1), tagMatcher.group(2));
+        for (String tagLine : tagLines) {
+            Matcher matcher = TAG_PATTERN.matcher(tagLine);
+            if (matcher.matches()) {
+                tags.put(matcher.group(1), matcher.group(2));
             }
         }
 
-        // Parse move section
-        while (scanner.hasNextLine()) {
-            moveSection.append(scanner.nextLine()).append(" ");
-        }
-        scanner.close();
+        List<Move> moves = new ArrayList<>();
+        Matcher tokenMatcher = MOVE_TOKEN_PATTERN.matcher(moveSection);
+        int moveNumber = 1;
+        boolean whiteTurn = true;
 
-        Matcher tokenMatcher = MOVE_TOKEN_PATTERN.matcher(moveSection.toString());
         while (tokenMatcher.find()) {
             String token = tokenMatcher.group().trim();
 
             if (token.matches("\\d+\\.")) {
-                continue; // Skip move numbers like "1."
-            } else if (token.matches("1-0|0-1|1/2-1/2|\\*")) {
-                result = token;
-            } else if (!token.isEmpty()) {
-                moves.add(new Move(token));
+                moveNumber = Integer.parseInt(token.replace(".", ""));
+                whiteTurn = true;
+            } else if (token.matches("1-0|0-1|1/2-1/2|\\*") || token.isEmpty()) {
+                continue;
+            } else {
+                moves.add(new Move(token, moveNumber, whiteTurn, moveSection));
+                whiteTurn = !whiteTurn;
             }
         }
 
-        return new PGNGame(tags, moves, result);
+        return new PGNGame(tags, moves, moveSection);
     }
 }
