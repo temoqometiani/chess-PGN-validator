@@ -23,21 +23,27 @@ public class PGNValidator {
      */
     public boolean validate(PGNGame game) {
         errors.clear();
+
+        List<Move> moves = game.getMoves();
+        if (moves.isEmpty()) {
+            errors.add("Empty game: No moves found.");
+            return false;
+        }
+
         board = new Board(); // Reset the board for each game
         whiteTurn = true;
 
-        List<Move> moves = game.getMoves();
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
-            String notation = move.getNotation();
+            String notation = move.getSan();
 
             if (!isValidSAN(notation)) {
-                errors.add("Syntax error at move " + (i + 1) + ": Invalid SAN '" + notation + "'");
-                return false; // early termination
+                errors.add("Syntax error at move " + move.getMoveNumber() + ": Invalid SAN '" + notation + "'");
+                return false;
             }
 
             if (!applyMove(notation)) {
-                errors.add("Illegal move at " + (i + 1) + ": '" + notation + "'");
+                errors.add("Illegal move at " + move.getMoveNumber() + ": '" + notation + "'");
                 return false;
             }
 
@@ -48,7 +54,7 @@ public class PGNValidator {
     }
 
     private boolean isValidSAN(String move) {
-        return move.matches("([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](=[QRNB])?[+#]?|O-O(-O)?)[+#]?"); // rough SAN regex
+        return move.matches("([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](=[QRNB])?[+#]?|O-O(-O)?)[+#]?");
     }
 
     /**

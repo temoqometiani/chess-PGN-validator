@@ -22,7 +22,7 @@ public class PGNValidatortest {
 
     @Test
     public void testValidGameValidation() {
-        File file = new File("src/test/resources/valid_game.pgn");
+        File file = new File("src/resources/good.pgn");
         List<PGNGame> games = parser.parse(file);
         assertFalse(games.isEmpty(), "Valid PGN should parse at least one game");
         PGNGame game = games.get(0);
@@ -32,7 +32,7 @@ public class PGNValidatortest {
 
     @Test
     public void testInvalidSyntaxDetection() {
-        File file = new File("src/test/resources/syntax_error.pgn");
+        File file = new File("src/resources/syntax.pgn");
         List<PGNGame> games = parser.parse(file);
         assertFalse(games.isEmpty(), "PGN should parse with errors");
         PGNGame game = games.get(0);
@@ -43,7 +43,7 @@ public class PGNValidatortest {
 
     @Test
     public void testIllegalMoveDetection() {
-        File file = new File("src/test/resources/illegal_move.pgn");
+        File file = new File("src/resources/illegalmove.pgn");
         List<PGNGame> games = parser.parse(file);
         assertFalse(games.isEmpty(), "PGN should parse with illegal move");
         PGNGame game = games.get(0);

@@ -20,7 +20,7 @@ public class PGNparserTest {
 
     @Test
     public void testParseValidPGNFile() {
-        File file = new File("src/test/resources/valid_game.pgn");
+        File file = new File("src/test/resources/good.pgn");
         List<PGNGame> games = parser.parse(file);
 
         assertFalse(games.isEmpty(), "Should parse at least one game");
@@ -38,7 +38,7 @@ public class PGNparserTest {
 
     @Test
     public void testParseMalformedTags() {
-        File file = new File("src/test/resources/malformed_tags.pgn");
+        File file = new File("src/resources/syntax.pgn");
         List<PGNGame> games = parser.parse(file);
         assertEquals(1, games.size(), "Parser should still return a game despite malformed tags");
         assertFalse(games.get(0).getTags().isEmpty(), "Tags should be present, even if partially parsed");
@@ -46,14 +46,14 @@ public class PGNparserTest {
 
     @Test
     public void testParseMultipleGames() {
-        File file = new File("src/test/resources/multiple_games.pgn");
+        File file = new File("src/resources/multiplegames.pgn");
         List<PGNGame> games = parser.parse(file);
         assertEquals(2, games.size(), "Should parse multiple games correctly");
     }
 
     @Test
     public void testMoveParsingAccuracy() {
-        File file = new File("src/test/resources/valid_game.pgn");
+        File file = new File("src/resources/good.pgn");
         System.out.println("File exists? " + file.exists());
 
         List<PGNGame> games = parser.parse(file);

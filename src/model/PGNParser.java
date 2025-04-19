@@ -27,7 +27,7 @@ public class PGNParser {
                 if (line.startsWith("[")) {
                     currentTags.add(line);
                 } else if (line.isEmpty()) {
-                    if (!currentTags.isEmpty() || moveText.length() > 0) {
+                    if (moveText.toString().trim().length() > 0) {
                         PGNGame game = parseGame(currentTags, moveText.toString());
                         games.add(game);
                         currentTags.clear();
@@ -39,7 +39,7 @@ public class PGNParser {
             }
 
             // Add last game if file doesn't end with a blank line
-            if (!currentTags.isEmpty() || moveText.length() > 0) {
+            if (moveText.toString().trim().length() > 0) {
                 PGNGame game = parseGame(currentTags, moveText.toString());
                 games.add(game);
             }

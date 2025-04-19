@@ -91,4 +91,5 @@ public class Board {
     public Square[][] getSquareArray() {
         return board;
     }
+
 }
