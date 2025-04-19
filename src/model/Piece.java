@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Abstract base class for all chess pieces.
+ */
 public abstract class Piece {
     private final int color; // 0 = Black, 1 = White
     private Square currentSquare;
@@ -111,4 +114,30 @@ public abstract class Piece {
     }
 
     public abstract List<Square> getLegalMoves(Board board);
+
+    // Optional PGN play-move logic (to be implemented in subclasses)
+    public abstract boolean playMove(Board board, String notation);
+
+    /**
+     * Determines if this piece is responsible for the PGN move.
+     */
+    public boolean canHandle(String notation) {
+        if (notation == null || notation.isEmpty()) return false;
+
+        char first = notation.charAt(0);
+
+        if (this instanceof king && first == 'K') return true;
+        if (this instanceof Queen && first == 'Q') return true;
+        if (this instanceof Rook && first == 'R') return true;
+        if (this instanceof Bishop && first == 'B') return true;
+        if (this instanceof Knight && first == 'N') return true;
+
+        // Pawn moves (like "e4", "exd5", "e8=Q")
+        if (this instanceof Pawn && first >= 'a' && first <= 'h') return true;
+
+        // Castling moves (handled by king, notation = O-O or O-O-O)
+        if (this instanceof king && (notation.equals("O-O") || notation.equals("O-O-O"))) return true;
+
+        return false;
+    }
 }

@@ -40,6 +40,11 @@ public class Rook extends Piece {
         return legalMoves;
     }
 
+    @Override
+    public boolean playMove(Board board, String notation) {
+        return false;
+    }
+
     private boolean addIfLegal(Square[][] board, List<Square> moves, int x, int y) {
         Square target = board[x][y];
         if (!target.isOccupied()) {

@@ -46,6 +46,11 @@ public class Queen extends Piece {
         return legalMoves;
     }
 
+    @Override
+    public boolean playMove(Board board, String notation) {
+        return false;
+    }
+
     private boolean isInBounds(int x, int y) {
         return x >= 0 && y >= 0 && x < 8 && y < 8;
     }
